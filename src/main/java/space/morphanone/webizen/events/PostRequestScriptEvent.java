@@ -10,6 +10,7 @@ import com.denizenscript.denizencore.utilities.debugging.Debug;
 import space.morphanone.webizen.server.RequestWrapper;
 
 import java.io.*;
+import java.util.stream.Collectors;
 
 public class PostRequestScriptEvent extends BasicRequestScriptEvent {
 
@@ -48,6 +49,7 @@ public class PostRequestScriptEvent extends BasicRequestScriptEvent {
     public ElementTag saveUpload;
     public byte[] requestBody;
     public ElementTag fileName;
+    public RequestWrapper request;
 
     @Override
     public String getRequestType() {
@@ -57,7 +59,7 @@ public class PostRequestScriptEvent extends BasicRequestScriptEvent {
     @Override
     public void fire(HttpExchange httpExchange) {
         try {
-            RequestWrapper request = new RequestWrapper(httpExchange);
+            this.request = new RequestWrapper(httpExchange);
             this.requestBody = request.getFile();
             this.fileName = new ElementTag(request.getFileName());
         } catch (Exception e) {
@@ -102,6 +104,15 @@ public class PostRequestScriptEvent extends BasicRequestScriptEvent {
         }
         else if (name.equals("upload_size_mb")) {
             return new ElementTag(requestBody.length/(1000*1000));
+        }
+        else if (name.equals("address")) {
+            return new ElementTag(httpExchange.getRemoteAddress().getAddress().getHostAddress());
+        }
+        else if (name.equals("request")) {
+            return new ElementTag(httpExchange.getHttpContext().getPath());
+        }
+        else if (name.equals("query")) {
+            return new ElementTag(new BufferedReader(new InputStreamReader(httpExchange.getRequestBody())).lines().collect(Collectors.joining("\\n")));
         }
         return super.getContext(name);
     }
