@@ -60,7 +60,7 @@ public class PostRequestScriptEvent extends BasicRequestScriptEvent {
     public void fire(HttpExchange httpExchange) {
         try {
             this.request = new RequestWrapper(httpExchange);
-            this.requestBody = request.getFile();
+          //this.requestBody = request.getFile();
             this.fileName = new ElementTag(request.getFileName());
         } catch (Exception e) {
             Debug.echoError(e);
