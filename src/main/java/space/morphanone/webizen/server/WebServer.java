@@ -22,9 +22,9 @@ public class WebServer {
                     if (httpExchange.getRequestMethod().equalsIgnoreCase("GET")) {
                         GetRequestScriptEvent.instance.fire(httpExchange);
                     }
-                    //else if (httpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
-                    //    PostRequestScriptEvent.instance.fire(httpExchange);
-                    //}
+                    else if (httpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                        PostRequestScriptEvent.instance.fire(httpExchange);
+                    }
                 }
             });
             httpServer.setExecutor(new Executor() {
