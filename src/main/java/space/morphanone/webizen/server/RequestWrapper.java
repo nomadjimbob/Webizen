@@ -53,6 +53,21 @@ public class RequestWrapper {
         return httpExchange.getRequestURI();
     }
 
+    public String getBody() throws IOException {
+        InputStreamReader isr = new InputStreamReader(httpExchange.getRequestBody(), StandardCharsets.UTF_8);
+        BufferedReader br = new BufferedReader(isr);
+        int b;
+        StringBuilder buf = new StringBuilder();
+        while ((b = br.read()) != -1) {
+            buf.append((char) b);
+        }
+        return buf.toString();
+    }
+
+    public String getEntireRequest() throws IOException {
+        return new String(this.entireRequest);
+    }
+
     public byte[] getFile() throws IOException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(entireRequest);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));

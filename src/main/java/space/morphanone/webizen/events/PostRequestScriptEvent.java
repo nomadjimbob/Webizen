@@ -1,16 +1,17 @@
 package space.morphanone.webizen.events;
 
-import com.sun.net.httpserver.HttpExchange;
 import com.denizenscript.denizen.utilities.DenizenAPI;
 import com.denizenscript.denizen.utilities.Utilities;
-import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.objects.ObjectTag;
+import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.utilities.CoreUtilities;
 import com.denizenscript.denizencore.utilities.debugging.Debug;
+import com.sun.net.httpserver.HttpExchange;
 import space.morphanone.webizen.server.RequestWrapper;
 
-import java.io.*;
-import java.util.stream.Collectors;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class PostRequestScriptEvent extends BasicRequestScriptEvent {
 
@@ -50,6 +51,8 @@ public class PostRequestScriptEvent extends BasicRequestScriptEvent {
     public byte[] requestBody;
     public ElementTag fileName;
     public RequestWrapper request;
+    public ElementTag entire_body;
+    public ElementTag body;
 
     @Override
     public String getRequestType() {
@@ -62,6 +65,8 @@ public class PostRequestScriptEvent extends BasicRequestScriptEvent {
             this.request = new RequestWrapper(httpExchange);
           //this.requestBody = request.getFile();
             this.fileName = new ElementTag(request.getFileName());
+            this.body = new ElementTag(request.getBody());
+            this.entire_body = new ElementTag(request.getEntireRequest());
         } catch (Exception e) {
             Debug.echoError(e);
         }
@@ -112,7 +117,7 @@ public class PostRequestScriptEvent extends BasicRequestScriptEvent {
             return new ElementTag(httpExchange.getHttpContext().getPath());
         }
         else if (name.equals("query")) {
-            return new ElementTag(new BufferedReader(new InputStreamReader(httpExchange.getRequestBody())).lines().collect(Collectors.joining("\\n")));
+            return this.entire_body;
         }
         return super.getContext(name);
     }
