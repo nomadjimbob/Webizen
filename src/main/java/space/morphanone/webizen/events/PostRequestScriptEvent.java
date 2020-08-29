@@ -33,6 +33,7 @@ public class PostRequestScriptEvent extends BasicRequestScriptEvent {
     // <context.user_info> Returns info about the authenticated user sending the request, if any.
     // <context.upload_name> returns the name of the file posted.
     // <context.upload_size_mb> returns the size of the upload in MegaBytes (where 1 MegaByte = 1 000 000 Bytes).
+    // <context.headers> returns a MapTag of the headers of the request.
     //
     // @Determine
     // ElementTag to set the content of the response directly
