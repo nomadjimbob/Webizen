@@ -126,7 +126,7 @@ public class PostRequestScriptEvent extends BasicRequestScriptEvent {
             MapTag map = new MapTag();
             Headers headers = httpExchange.getRequestHeaders();
             for (String key : headers.keySet()) {
-                map.putObject(key, new ElementTag(headers.get(key).get(1)));
+                map.putObject(key, new ElementTag(headers.get(key).get(0)));
             }
             return map;
         }
