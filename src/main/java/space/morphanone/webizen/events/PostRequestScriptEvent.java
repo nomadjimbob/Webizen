@@ -4,8 +4,10 @@ import com.denizenscript.denizen.utilities.DenizenAPI;
 import com.denizenscript.denizen.utilities.Utilities;
 import com.denizenscript.denizencore.objects.ObjectTag;
 import com.denizenscript.denizencore.objects.core.ElementTag;
+import com.denizenscript.denizencore.objects.core.MapTag;
 import com.denizenscript.denizencore.utilities.CoreUtilities;
 import com.denizenscript.denizencore.utilities.debugging.Debug;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import space.morphanone.webizen.server.RequestWrapper;
 
@@ -118,6 +120,13 @@ public class PostRequestScriptEvent extends BasicRequestScriptEvent {
         }
         else if (name.equals("query")) {
             return this.entire_body;
+        }
+        else if (name.equals("headers")) {
+            MapTag map = new MapTag();
+            Headers headers = httpExchange.getRequestHeaders();
+            for (String key : headers.keySet()) {
+                map.putObject(key, new ElementTag(headers.get(key).toString()));
+            }
         }
         return super.getContext(name);
     }
