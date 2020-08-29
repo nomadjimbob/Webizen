@@ -128,6 +128,7 @@ public class PostRequestScriptEvent extends BasicRequestScriptEvent {
             for (String key : headers.keySet()) {
                 map.putObject(key, new ElementTag(headers.get(key).toString()));
             }
+            return map;
         }
         return super.getContext(name);
     }
