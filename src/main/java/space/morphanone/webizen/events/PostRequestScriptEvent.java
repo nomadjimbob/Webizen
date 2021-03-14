@@ -15,6 +15,8 @@ import space.morphanone.webizen.server.RequestWrapper;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 public class PostRequestScriptEvent extends BasicRequestScriptEvent {
 
@@ -80,8 +82,7 @@ public class PostRequestScriptEvent extends BasicRequestScriptEvent {
 
         if (this.saveUpload != null) {
             try {
-                //File file = new File(DenizenAPI.getCurrentInstance().getDataFolder(), saveUpload.asString());
-                File file = new File(DenizenAPI.getInstance().getDataFolder(), saveUpload.asString());
+                File file = new File(Denizen.getInstance().getDataFolder(), saveUpload.asString());
                 if (!Utilities.canWriteToFile(file)) {
                     Debug.echoError("Save failed: cannot save there!");
                     return;
@@ -123,6 +124,24 @@ public class PostRequestScriptEvent extends BasicRequestScriptEvent {
         }
         else if (name.equals("query")) {
             return this.entire_body;
+        }
+        else if (name.equals("query_map") ) {
+	        MapTag mappedValues = new MapTag();
+	        try {
+		        String query = this.request.getEntireRequest();
+		        if (query != null) {
+		            for (String value : CoreUtilities.split(query, '&')) {
+		                List<String> split = CoreUtilities.split(value, '=', 2);
+	                    String split_key = java.net.URLDecoder.decode(split.get(0), "UTF-8");
+	                    String split_value = java.net.URLDecoder.decode(split.get(1), "UTF-8");
+	                    mappedValues.putObject(split_key, new ElementTag(split_value));
+		            }
+		        }
+            }
+            catch (Exception e) {
+                Debug.echoError(e);
+            }
+	        return mappedValues;
         }
         else if (name.equals("headers")) {
             MapTag map = new MapTag();
