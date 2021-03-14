@@ -1,19 +1,22 @@
 package space.morphanone.webizen.events;
 
+import com.denizenscript.denizen.Denizen;
+import com.denizenscript.denizen.events.BukkitScriptEvent;
 import com.denizenscript.denizen.utilities.Utilities;
 import com.denizenscript.denizencore.objects.core.MapTag;
-import com.denizenscript.denizencore.utilities.text.StringHolder;
+//import com.denizenscript.denizencore.utilities.text.StringHolder;
 import com.sun.net.httpserver.HttpExchange;
 import com.denizenscript.denizen.utilities.implementation.BukkitScriptEntryData;
 import com.denizenscript.denizen.tags.BukkitTagContext;
-import com.denizenscript.denizen.utilities.DenizenAPI;
-import com.denizenscript.denizencore.events.ScriptEvent;
+//import com.denizenscript.denizen.utilities.DenizenAPI;
+//import com.denizenscript.denizencore.events.ScriptEvent;
 import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.objects.ObjectTag;
 import com.denizenscript.denizencore.scripts.ScriptEntryData;
 import com.denizenscript.denizencore.tags.TagManager;
 import com.denizenscript.denizencore.utilities.CoreUtilities;
 import com.denizenscript.denizencore.utilities.debugging.Debug;
+import org.bukkit.scheduler.BukkitRunnable;
 import space.morphanone.webizen.fake.FakeScriptEntry;
 import space.morphanone.webizen.server.ResponseWrapper;
 
@@ -26,10 +29,13 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public abstract class BasicRequestScriptEvent extends ScriptEvent {
+//public abstract class BasicRequestScriptEvent extends ScriptEvent {
+public abstract class BasicRequestScriptEvent extends BukkitScriptEvent {
 
     public HttpExchange httpExchange;
 
@@ -57,8 +63,28 @@ public abstract class BasicRequestScriptEvent extends ScriptEvent {
         this.httpExchange = httpExchange;
         scriptResponse = new ResponseOptions();
 
-        fire();
+        //fire();
+        CompletableFuture future = new CompletableFuture();
+        BukkitScriptEvent altEvent = (BukkitScriptEvent) clone();
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                altEvent.fire();
+                future.complete(null);
+            }
+        }.runTask(Denizen.getInstance());
 
+        try {
+            future.get();
+        }
+        catch (InterruptedException ex) {
+            Debug.echoError(ex);
+        }
+        catch (ExecutionException ex) {
+            Debug.echoError(ex);
+        }
+        
+        
         ResponseWrapper response = new ResponseWrapper(httpExchange);
         try {
             // Add context to fake ScriptQueue for parsed file tags
@@ -105,12 +131,16 @@ public abstract class BasicRequestScriptEvent extends ScriptEvent {
 
     @Override
     public boolean couldMatch(ScriptPath path) {
-        return path.eventLower.startsWith(lowerRequestType + " ");
-    }
+        //return path.eventLower.startsWith(lowerRequestType + " ");
+    //}
 
-    @Override
-    public boolean matches(ScriptPath path) {
-        return path.eventArgLowerAt(1).equals("request");
+    //@Override
+    //public boolean matches(ScriptPath path) {
+        //return path.eventArgLowerAt(1).equals("request");
+        if (!path.eventLower.startsWith(lowerRequestType + " request")) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -130,7 +160,8 @@ public abstract class BasicRequestScriptEvent extends ScriptEvent {
             scriptResponse.responseCode = code;
         }
         else if (lower.startsWith("file:")) {
-            File file = new File(DenizenAPI.getCurrentInstance().getDataFolder(), determinationObj.toString().substring(5));
+            //File file = new File(DenizenAPI.getCurrentInstance().getDataFolder(), determinationObj.toString().substring(5));
+            File file = new File(DenizenAPI.getInstance().getDataFolder(), determinationObj.toString().substring(5));
             if (!file.exists()) {
                 Debug.echoError("File '" + file + "' does not exist.");
                 return false;
@@ -171,7 +202,7 @@ public abstract class BasicRequestScriptEvent extends ScriptEvent {
 
     @Override
     public ObjectTag getContext(String name) {
-        if (name.equals("address")) {
+/*        if (name.equals("address")) {
             return new ElementTag(httpExchange.getRemoteAddress().toString());
         }
         else if (name.equals("query")) {
@@ -190,17 +221,43 @@ public abstract class BasicRequestScriptEvent extends ScriptEvent {
                         mappedValues.map.put(new StringHolder(split_key), new ElementTag(split_value));
                     }
                     catch (UnsupportedEncodingException e) {
-                        Debug.echoError(e);
+                        Debug.echoError(e);*/
+        switch (name) {
+            case "address":
+                return new ElementTag(httpExchange.getRemoteAddress().toString());
+            case "query": {
+                String query = httpExchange.getRequestURI().getQuery();
+                return new ElementTag(query != null ? query : "");
+            }
+            case "query_map": {
+                MapTag mappedValues = new MapTag();
+                String query = httpExchange.getRequestURI().getQuery();
+                if (query != null) {
+                    for (String value : CoreUtilities.split(query, '&')) {
+                        List<String> split = CoreUtilities.split(value, '=', 2);
+                        try {
+                            String split_key = java.net.URLDecoder.decode(split.get(0), "UTF-8");
+                            String split_value = java.net.URLDecoder.decode(split.get(1), "UTF-8");
+                            mappedValues.putObject(split_key, new ElementTag(split_value));
+                        }
+                        catch (UnsupportedEncodingException e) {
+                            Debug.echoError(e);
+                        }
                     }
                 }
+                return mappedValues;
             }
-            return mappedValues;
-        }
-        else if (name.equals("request")) {
-            return new ElementTag(httpExchange.getRequestURI().getPath());
-        }
-        else if (name.equals("user_info")) {
-            return new ElementTag(httpExchange.getRequestURI().getUserInfo());
+            //return mappedValues;
+        //}
+        //else if (name.equals("request")) {
+        //    return new ElementTag(httpExchange.getRequestURI().getPath());
+        //}
+        //else if (name.equals("user_info")) {
+        //    return new ElementTag(httpExchange.getRequestURI().getUserInfo());
+            case "request":
+                return new ElementTag(httpExchange.getRequestURI().getPath());
+            case "user_info":
+                return new ElementTag(httpExchange.getRequestURI().getUserInfo());
         }
         return super.getContext(name);
     }
