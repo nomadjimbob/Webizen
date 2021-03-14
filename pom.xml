@@ -7,14 +7,14 @@
     <groupId>space.morphanone</groupId>
     <artifactId>webizen</artifactId>
     <packaging>jar</packaging>
-    <version>0.2.5-SNAPSHOT</version>
+    <version>0.2.6-SNAPSHOT</version>
     <name>Webizen</name>
     <description>Web page add-on for Denizen</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <bukkit.version>1.15.2-R0.1-SNAPSHOT</bukkit.version>
-        <denizen.version>1.1.6-SNAPSHOT</denizen.version>
+        <bukkit.version>1.16.5-R0.1-SNAPSHOT</bukkit.version>
+        <denizen.version>1.1.9-SNAPSHOT</denizen.version>
     </properties>
 
     <issueManagement>
